@@ -25,13 +25,9 @@ import axios from 'axios'
     data() {
       return {
         speechStart: false,
-        gottenDetails: {},
-        err: ''
+        errMsg: ''
       }
     },
-    // updated() {
-    //   console.log('hello')
-    // },
     methods: {
       startSpeechRecognition () {
         this.speechStart = true; //showing alert for microphone listening
@@ -46,24 +42,12 @@ import axios from 'axios'
         recognition.start();
 
         recognition.onspeechend = function() {
-          recognition.stop();
+          recognition.stop(); //speech function stops when the onspeechend function is fired
         }
 
-        recognition.onresult = function(event) {
+        recognition.onresult = function(event) {  //function displaying the bot's response
           axios.get('https://corona.lmao.ninja/v2/countries/'+ event.results[0][0].transcript)
           .then((res) => {
-            const details = {
-              country: res.data.country,
-              cases: res.data.cases,
-              activeCases: res.data.active,
-              criticalCases: res.data.critical,
-              death: res.data.deaths,
-              recovered: res.data.recovered,
-              todayCase: res.data.todayCases,
-              todayDeath: res.data.todayDeaths
-            }
-            this.gottenDetails = details
-            // console.log(this.gottenDetails)
             var msg = new SpeechSynthesisUtterance('Country Selected'+ res.data.country + 'Total Cases' + res.data.cases + 'Active cases' + res.data.active + 'Critical cases' + res.data.critical + 'Death' + res.data.deaths + 'Recovered' + res.data.recovered + 'Today case' + res.data.todayCases + 'Todays death' + res.data.todayDeaths);
             var voices = window.speechSynthesis.getVoices();
             msg.voice = voices[1];
@@ -74,11 +58,14 @@ import axios from 'axios'
             msg.lang = 'en-US';
             window.speechSynthesis.speak(msg);
           })
-          .catch(err => this.err = err)
-          // console.log('you said', event.results[0][0].transcript)
+          .catch((err) => {
+            this.errMsg = err
+            var msg = new SpeechSynthesisUtterance('Hi User, What you have provided me is not a country. Kindly provide me with the name of a country and i will get the update.');
+            window.speechSynthesis.speak(msg);
+          })
         }
 
-        recognition.onerror = function() {
+        recognition.onerror = function() { //error function fired
           var msg = new SpeechSynthesisUtterance('I did not hear you clearly, You could increase your voice a little for me to hear you');
           window.speechSynthesis.speak(msg);
         }
