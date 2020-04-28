@@ -1,4 +1,5 @@
 <template>
+<!-- navbar -->
   <v-app>
     <v-app-bar
       app
